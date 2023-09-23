@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.4.min.js"></script>
+
+<body>
+    <div class="content">
+
+        <div class="height">
+
+            <img src="https://leda-signal-test.s3.ap-northeast-2.amazonaws.com/ad/skip_bt2.gif" class="next 버튼"
+                onclick="gonext()">
+            <img class="bgimg bg"
+                src="https://raw.githubusercontent.com/meowljane/MSD-ver1/main/dialogue/myroom/%ED%95%99%EA%B5%90%EB%B0%B0%EA%B2%BD.jpg">
+            <img class="bgimg char" src="">
+            <img class="bgimg chat" src="https://raw.githubusercontent.com/meowljane/MSD-ver1/main/img/conv_girl.png">
+            <input class ="inputtext" type="text">
+            <img class="out 버튼" src="https://leda-signal-test.s3.ap-northeast-2.amazonaws.com/ad/close_bt.png"
+                onclick="closeWidget()" onmouseover="jelatin()">
+
+            <div class="concon">
+                <h1 class="name">???</h1>
+                <h1 class="con"></h1>
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+
+    <script>
+        function preloading(imageArray) {
+            let n = imageArray.length;
+            for (let i = 0; i < n; i++) {
+                let img = new Image();
+                img.src = imageArray[i];
+            }
+        }
+
+        preloading([
+            'https://raw.githubusercontent.com/meowljane/MSD-ver1/main/img/bg_school.png',
+            'https://raw.githubusercontent.com/meowljane/MSD-ver1/main/img/conv_girl.png'
+        ])
+
+        
+        const text = document.querySelector(".con")
+        let index = 0;
+        let i = 0
+        let skip = 0
+        let condition = true
+        let myname = $('.inputtext').val()
+        const arr = [
+            { name: "???", exp: null, bg: null, chat : null, script: "[평화로운 어느날 아침]", anim : null },
+            { name: "???", exp: null, bg: null, chat : "cat", script: "냥... 애옹 애옹.", anim : null },
+            { name: "???", exp: null, bg: null, chat : "cat", script: "애옹...애옹...", anim : null },
+            { name: "고양이(?)", exp: "NPC10_default", bg: null, chat : "cat", script: "(어휴. 일어나라옹!!!)", anim : "shake" },
+            { name: "???", exp: null, bg: null, chat : null, script: "...? 뭐지? 고양이가 말을...?", anim : null },
+            { name: "고양이(?)", exp: "NPC10_default", bg: null, chat : "cat", script: "흠..흠...애옹.\n(답답해서 못살겠다옹. 내 이름은 콩이다옹!) ", anim : null },
+            { name: "콩이", exp: "NPC10_default", bg: null, chat : "cat", script: "애옹....냥냥. 냐옹? \n(너는 오늘 소당고등학교에 전학오기로 했다옹. 맞냐옹?) ", anim : null },
+            { name: "???", exp: null, bg: null, script: "맞...맞는데...? \n 넌 그걸 어떻게 알고 있니?", anim : null },
+            { name: "콩이", exp: "NPC10_default", bg: null, chat : "cat", script: "냐냥!! 냥!! 냐냥!! \n(나는 소당고등학교의 수호신이다옹!) ", anim : null },
+            { name: "콩이", exp: "NPC10_default", bg: null, chat : "cat", script: "애옹... 그르릉...애옹. \n(너의 적응을 도와주기 위해서 여기까지 왔다옹.) ", anim : null },
+            { name: "???", exp: null, bg: null, chat : null, script: "(고양이가 어떻게 내 학교생활을 돕겠다는 건데...)", anim : null },
+            { name: "콩이", exp: "NPC10_default", bg: null, chat : "cat", script: "하악!! 캬악!!! \n(분명 어젯밤에 너가 학교생활에 적응하게 도와달라고 빌지 않았냐옹!!!) ", anim : "shake" },
+            { name: "콩이", exp: "NPC10_default", bg: null, chat : "cat", script: "햐아아악!! 애옹!!! \n(그래서 멀리서 도와주러 온건데 아주 괘씸하다옹!!) ", anim : "shake" },
+            { name: "???", exp: null, bg: null, chat : null, script: "그...그랬지 분명. \n (내 속마음은 어떻게 읽은거지?)", anim : null },
+            { name: "콩이", exp: "NPC10_default", bg: null, chat : "cat", script: "야아아아옹. 후후. 냐옹. \n(난 수호신이니까, 후후. 어쨌든 걱정마라옹. 내가 왔다옹.) ", anim : null },
+            { name: "???", exp: null, bg: null, chat : null, script: "(고양이가 후후 하고 웃었어......)", anim : null },
+            { name: "콩이", exp: "NPC10_default", bg: null, chat : "cat", script: "애옹. 애오오옹. 애옹? \n(그래서, 우리 친구의 고민은 뭐지?) ", anim : null },
+            { name: "???", exp: null, bg: null, chat : null, script: "(고양이한테 이런 고민까지 말해야 하나...)", anim : null },
+            { name: "???", exp: null, bg: null, chat : null, script: "음... 사실 난 \r 를 가지고 있어.\n 일상생활에 큰 문제가 되는건 아니지만, \n 처음 보는 친구들이 이런 날 어색해할까 걱정이야.", anim : null },
+            { name: "콩이", exp: "NPC10_default", bg: null, chat : "cat", script: "냐앙... 냥냥. 애옹애옹. \n(친구관계 고민이었구만. 이런 것 쯤 나에게 식은죽먹기지.) ", anim : null }, 
+            { name: "콩이", exp: "NPC10_default", bg: null, chat : "cat", script: "냐옹. 애옹애옹? \n(내가 도와줄게. 우리 친구 이름은 뭐지?) ", anim : null },
+            { name: "???", exp: null, bg: null, chat : null, script: "내 이름은...(5자 이내로 입력해주세요.)", anim : null },      
+            { name: "myname", exp: null, bg: null, chat : null, script: `내 이름은 \m인데...`, anim : null },      
+            { name: "콩이", exp: "NPC10_default", bg: null, chat : "cat", script: `냐오옹... 냥냥 \n(... 그렇군. \m. 멋진 이름이야)`, anim : null }, 
+        ]
+
+        function typing() {
+    if (index < arr[i].script.length) {
+        let txt = arr[i].script.charAt(index);
+        if (txt === "\n") {
+            text.innerHTML += "<br/>";
+        } else if (txt === "\m") {
+            text.innerHTML += myname;
+        } else if (txt === "\r") {
+            text.innerHTML += "<span style='color: red;'>소아당뇨</span>";
+        } 
+        else {
+            text.innerHTML += txt;
+        }
+        index++;
+    }
+}
+        setInterval(typing, 30)
+
+        function gonext() {
+            if (i == 21) {
+                $('.inputtext').css('visibility','visible')
+                condition =false
+                if($('.inputtext').val().length>0 && $('.inputtext').val().length<6){
+                    condition =true
+                    myname = $('.inputtext').val()
+                $('.inputtext').css('visibility','hidden')
+                }
+            }
+
+            if (index >= arr[i].script.length && i < arr.length - 1 && condition) {
+                text.textContent = "";
+                index = 0;
+                i++;
+                if (arr[i].name == "myname") {
+                    $('.name').text(`${myname}`);
+                }
+                else{
+                    $('.name').text(`${arr[i].name}`);
+                }
+                
+                if (arr[i].exp) {
+                    $('.char').attr("src", `https://raw.githubusercontent.com/meowljane/MSD-ver1/main/dialogue/myroom/${arr[i].exp}.png`);
+                }
+                else {
+                    $('.char').attr("src", ``);
+                }
+
+                if (arr[i].anim) {
+                    $('.char').addClass(`${arr[i].anim}`);
+                }
+                else{ 
+                    $('.char').attr('class','bgimg char')
+                }
+
+                
+
+                if (arr[i].chat == "cat") {
+                    $('.chat').attr("src", `https://raw.githubusercontent.com/meowljane/MSD-ver1/main/dialogue/myroom/conv_cat.png`);
+                    }
+                else{
+                    $('.chat').attr("src", `https://raw.githubusercontent.com/meowljane/MSD-ver1/main/img/conv_girl.png`);
+                }
+
+                if (arr[i].bg){
+                    $('.bg').attr("src", `https://raw.githubusercontent.com/meowljane/MSD-ver1/main/img/bg_${arr[i].bg}.png`);
+                }
+
+            }
+
+            else if (index < arr[i].script.length) {
+                text.innerText = arr[i].script
+                index = 9999999;
+            }
+            
+        }
+
+        function goback() {
+            if (index >= arr[i].script.length && i > 0) {
+                text.textContent = "";
+                index = 0;
+                i--;
+                $('.name').text(`${arr[i].name}`);
+
+                if (arr[i].exp) {
+                    $('.char').attr("src", `https://raw.githubusercontent.com/meowljane/MSD-ver1/main/dialogue/myroom/${arr[i].exp}.png`);
+                }
+                else {
+                    $('.char').attr("src", ``);
+                }
+
+                if (arr[i].bg) {
+                    $('.bg').attr("src", `https://raw.githubusercontent.com/meowljane/MSD-ver1/main/img/bg_${arr[i].bg}.png`);
+                }
+                if (arr[i].anim) {
+                    $('.char').addClass(`${arr[i].anim}`);
+                }
+                else{ $('.char').attr('class','bgimg char')}
+
+            }
+
+            else if (index < arr[i].script.length) {
+                text.innerText = arr[i].script
+                index = 9999999;
+            }
+            else if (i == 3) {
+                window.parent.postMessage(
+                    {
+                        type: "open",
+                    },
+                    "*"
+                );
+            }
+        }
+
+
+
+
+        var jelatin = function () {
+            $('.out').addClass('jelatin');
+
+            setTimeout(function () {
+                $('.out').removeClass('jelatin');
+            }, 480)
+        }
+
+        function closeWidget() {
+            window.parent.postMessage(
+                {
+                    type: "close",
+                },
+                "*"
+            );
+        }
+
+
+
+
+    </script>
+
+    <style>
+        @font-face {
+            font-family: '넥슨';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/NEXON Lv1 Gothic OTF Light.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        .content {
+            height: 100vh;
+            display: grid;
+            align-items: center;
+        }
+
+        .height {
+            position: relative;
+        }
+
+        .bgimg {
+            width: 100%;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+
+        .concon {
+            position: absolute;
+            width: 100%;
+            top: 0%;
+        }
+
+        .con {
+            position: absolute;
+            width: 96%;
+            font-size: 3vw;
+            margin: 60% 7%;
+            line-height: 1.55;
+            font-family: '넥슨';
+            display: inline;
+            vertical-align: middle;
+            color: darkslategray;
+            padding-right: 15%;
+        }
+        .inputtext {
+            position: absolute;
+    width: 50%;
+    visibility: hidden;
+    top: 72%;
+    left: 7%;
+    z-index: 9;
+        }
+
+        .name {
+            -webkit-text-stroke-width: 1px;
+-webkit-text-stroke-color: white;
+
+            position: absolute;
+            width: 42%;
+            font-size: 4.5vw;
+            margin: 50% 3%;
+            line-height: 1.8;
+            font-family: '넥슨';
+            display: inline;
+            vertical-align: middle;
+            color: darkslategray;
+            padding-right: 15%;
+            text-align: center;
+        }
+
+        .버튼 {
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .out {
+            position: absolute;
+            width: 10%;
+            opacity: 1.0;
+            left: 90%;
+        }
+
+        .next {
+            position: relative;
+            width: 100%;
+        }
+
+
+
+
+
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            -ms-overflow-style: none;
+        }
+
+
+        @keyframes jelatin {
+            0% {
+                -webkit-transform: scale(1, 1);
+                opacity: 1;
+            }
+
+            10% {
+                -webkit-transform: scale(0.85, 0.85)
+            }
+
+            20% {
+                -webkit-transform: scale(1.1, 1.1)
+            }
+
+            40% {
+                -webkit-transform: scale(0.95, 0.95)
+            }
+
+            60% {
+                -webkit-transform: scale(1, 1);
+                opacity: 1
+            }
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translate(1px, 1px) rotate(0deg);
+            }
+
+            10% {
+                transform: translate(-1px, -2px) rotate(-1deg);
+            }
+
+            20% {
+                transform: translate(-3px, 0px) rotate(1deg);
+            }
+
+            30% {
+                transform: translate(3px, 2px) rotate(0deg);
+            }
+
+            40% {
+                transform: translate(1px, -1px) rotate(1deg);
+            }
+
+            50% {
+                transform: translate(-1px, 2px) rotate(-1deg);
+            }
+
+            60% {
+                transform: translate(-3px, 1px) rotate(0deg);
+            }
+
+            70% {
+                transform: translate(3px, 1px) rotate(-1deg);
+            }
+
+            80% {
+                transform: translate(-1px, -1px) rotate(1deg);
+            }
+
+            90% {
+                transform: translate(1px, 2px) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(1px, -2px) rotate(-1deg);
+            }
+        }
+
+
+        .jelatin {
+            -webkit-animation: jelatin;
+            -moz-animation: jelatin;
+            -o-animation: jelatin;
+            animation: jelatin;
+            -webkit-animation-duration: 0.s;
+            -moz-animation-duration: 0.8s;
+            -o-animation-duration: 0.8s;
+            animation-duration: 0.8s;
+            opacity: 1;
+            -webkit-animation-fill-mode: forwards;
+            -moz-animation-fill-mode: forwards;
+            -o-animation-fill-mode: forwards;
+            animation-fill-mode: forwards;
+            transition-timing-function: ease-out;
+        }
+
+        .shake {
+            animation: shake 0.5s;
+            animation-iteration-count: infinite;
+        }
+    </style>
+
+
+</body>
+</head>
+
+</html>
