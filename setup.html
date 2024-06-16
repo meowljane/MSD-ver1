@@ -1,0 +1,196 @@
+
+<!doctype html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1"><meta http-equiv="X-UA-Compatible" content="ie=edge"><title>게임 시작 샘플 페이지</title><script>function openLauncher () {
+    var launcherForm = document.forms.launcher_form || {};
+    var gameId = launcherForm.elements.game_id.value || '';
+
+    LauncherService.open(
+        {
+            gameId: gameId,
+            skipMaintenance: false,
+            exearg: 'arg1 arg2',
+            inflowPath: gameId.replace(/stove_/i, '')
+        },
+        function () {
+            console.log('런처 성공');
+        },
+        function (errorCode, apiErrorCode) {
+            console.log('런처 실패 => errorCode::', errorCode);
+            errorAlert(errorCode, apiErrorCode);
+        }
+    );
+}
+function errorAlert (errorCode, apiErrorCode) {
+    var errorMsg = '';
+
+    if (errorCode === 601) {
+        errorMsg = '원활한 게임 플레이를 위해 STOVE 클라이언트를 설치해 주세요.';
+    } else if (errorCode === 602) {
+        errorMsg = '안정적인 서비스 제공을 위하여 점검을 실시합니다. 점검 시간 동안 홈페이지 이용이 중단됩니다. 이용에 불편을 드려 죄송합니다.';
+    } else if (errorCode === 603) {
+        errorMsg = '현재 연결이 원활하지 않습니다. 잠시후에 다시 시도해 주세요.\n( ErrorCode : ' + apiErrorCode + ' )';
+    } else {
+        errorMsg = '현재 연결이 원활하지 않습니다. 잠시후에 다시 시도해 주세요.\n( ErrorCode : ' + apiErrorCode + ' )';
+    }
+
+    window.alert(errorMsg);
+}
+
+function checkAgreeTerms() {
+    var launcherForm = document.forms.launcher_form || {};
+    var gameId = launcherForm.elements.game_id.value;
+
+    LauncherService.checkAgreeTerms(
+        {
+            serviceId: gameId,
+            viewAreaId: 'SVC_AG',
+            nation: getCookie('NNTO')
+        },
+        function (isAgreeTerms) {
+            if (isAgreeTerms) {
+                openLauncher();
+            } else {
+                goPolicyTerms();
+            }
+        },
+        function (errorCode, apiErrorCode) {
+            console.log('약관동의 실패 => errorCode::', errorCode);
+            errorAlert(errorCode, apiErrorCode);
+        }
+    );
+}
+
+/** ========== Utils start ==========  **/
+function getCookie (name) {
+    var matches = (document.cookie || '').match(new RegExp('(?:^|;(?:\\s+)?)' + name + '=([^;]*)'));
+    return matches ? window.decodeURIComponent(matches[1]).replace(/\"/g, '') : null;
+}
+
+function getUrlParams (url) {
+    var result = {};
+    url.replace(/[?&]{1}([^=&#]+)=([^&#]*)/g, function(s, k, v) { result[k] = decodeURIComponent(v); });
+    return result;
+}
+
+function getRadioValue (eleTarget) {
+    var val = eleTarget.value;
+    var i, len;
+
+    if (!val) {
+        len = eleTarget.length;
+        for (i = 0; i < len; i++) {
+            if (eleTarget[i].checked) {
+                val = eleTarget[i].value;
+                break;
+            }
+        }
+    }
+
+    return val;
+}
+
+function setRadioValue (eleTarget, value) {
+    var val = eleTarget.value;
+    var i, len;
+
+    if (val) {
+        eleTarget.value = value;
+    } else {
+        len = eleTarget.length;
+        for (i = 0; i < len; i++) {
+            if (eleTarget[i].value === value) {
+                eleTarget[i].checked = true;
+                break;
+            }
+        }
+    }
+}
+
+function getDomain () {
+    var runType = (LauncherService.getRunType() || '');
+    var mainDomain = runType === 'sandbox' ? 'gate8' : 'onstove';
+
+    return mainDomain + '.com';
+}
+
+function getPrefix () {
+    var runType = (LauncherService.getRunType() || '');
+    return ['live','sandbox'].indexOf(runType) !== -1 ? '' : '-' + runType;
+}
+
+function getMemberDomain () {
+    return location.protocol + '//' + 'member' + getPrefix() + '.' + getDomain();
+}
+
+function getPolicyDomain () {
+    return location.protocol + '//policy' + getPrefix() + '.' + getDomain();
+}
+
+function goPolicyTerms () {
+    var launcherForm = document.forms.launcher_form || {};
+    var gameId = launcherForm.elements.game_id.value || '';
+
+    window.location.href = getPolicyDomain()
+        + '/?inflow_path=' + gameId.replace(/stove_/i, '')
+        + '&game_id=' + gameId
+        + '&redirect_url=' + encodeURIComponent(window.location.href);
+}
+
+function goLogin () {
+    window.location.href = getMemberDomain() + '/auth/login?redirect_url=' + encodeURIComponent(window.location.href);
+}
+
+function goLogout () {
+    window.location.href = getMemberDomain() + '/auth/logout?redirect_url=' + encodeURIComponent(window.location.href);
+}
+
+function goLink () {
+    if (getCookie('SUAT')) {
+        goLogout();
+    } else {
+        goLogin();
+    }
+}
+
+function changeGame (ele) {
+    if (ele.value) {
+        window.location.href = window.location.origin + window.location.pathname + "?game_id=" + ele.value;
+    }
+}
+
+function setAgentStatus (isAgent) {
+    setRadioValue(document.forms.launcher_form.elements.agent_status, isAgent);
+}
+
+function checkLogin () {
+    var isLogin = !!getCookie('SUAT');
+    document.getElementById('login').innerText = isLogin ? '로그아웃' : '로그인';
+    document.getElementById('dimmed').style.display = isLogin ? 'none' : 'block';
+
+    return isLogin;
+}
+
+function checkGame () {
+    var paramGameId = getUrlParams(window.location.href).game_id;
+    var eleGameId = document.forms.launcher_form.elements.game_id;
+
+    if (paramGameId) {
+        eleGameId.value = paramGameId;
+        setAgentStatus(String(eleGameId.options[eleGameId.selectedIndex].className === 'agent'));
+    }
+}
+
+/** ==========  Utils end ==========  **/
+
+function init () {
+    checkLogin();
+    checkGame();
+}</script><style>body {margin: 30px;}
+.form-container > li {line-height: 35px}
+.form-container > li:last-child {list-style: none}
+.form-label {display: inline-block; width: 70px; }
+.dimmed-area {position: absolute; top: 80px; left: 0; width: 100%; height: calc(100% - 80px); background-color: #eaeaeb;}
+.dimmed-cont {position: absolute; top: 20%; left: 50%; font-size:16px; margin-left: -60px;}
+.sel-box {width: 140px; height: 28px;}
+.game-start-area {padding: 40px 0 0 100px;}
+.btn {display: inline-block; margin-left: 4px; padding: 0 20px; height: 30px; line-height: 30px; font-size: 14px; color: #333; border: 1px solid #d5d5d5; background-color: #eaeaeb; text-align: center; cursor: pointer; border-radius: 4px; font-weight: 700; text-decoration: none;}
+.btn-game-start {display: inline-block; margin-left: 4px; padding: 0 36px; height: 48px; line-height: 48px; font-size: 18px; color: #fff; border: 1px solid #f0562d; background-color: #ff5000; text-align: center; cursor: pointer; border-radius: 4px; font-weight: 700; text-decoration: none;}</style></head><body onload="init()"><form action="javascript:checkAgreeTerms()" name="launcher_form"><h3>게임 시작 (런처 | Agent) 샘플 페이지 <span id="login" class="btn" onclick="goLink()">로그인</span></h3><ul class="form-container"><li><label><span class="form-label">Game</span> : <select name="game_id" class="sel-box" onchange="changeGame(this)"><option value="STOVE_TTO" class="agent" selected="selected">티타이니</option><option value="MVP_SDK_GUID_SB" class="agent">MVPSDKGUIDSB</option><option value="CAOA" class="launcher">C-AOA</option><option value="KARDS" class="launcher">KARDS</option><option value="GETAMPED" class="launcher">겟엠프드</option><option value="BP" class="launcher">블루프로토콜</option></select></label></li><li class="game-start-area"><input type="submit" class="btn-game-start" value="게임 시작"/></li></ul><div id="dimmed" class="dimmed-area"><p class="dimmed-cont">로그인 해주세요.</p></div></form><script defer="defer" src="https://static-new.gate8.com/sl-4.0.0/stove-launcher.js?v=2f94b653e81752b0adbb&2f94b653e81752b0adbb"></script></body></html>
